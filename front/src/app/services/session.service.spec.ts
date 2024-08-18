@@ -14,4 +14,8 @@ describe('SessionService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should start with isLogged is false', () => {
+    expect(service.isLogged).toBe(false);
+  })
 });
