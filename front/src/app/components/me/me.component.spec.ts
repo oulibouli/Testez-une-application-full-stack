@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { SessionService } from 'src/app/services/session.service';
 import { of } from 'rxjs';
 
@@ -20,6 +20,7 @@ describe('MeComponent', () => {
   let mockSessionService: jest.Mocked<SessionService>
   let mockUserService: jest.Mocked<UserService>
   let router: jest.Mocked<Router>
+  let matSnackBarMock: jest.Mocked<MatSnackBar>
   const mockUser: User = {
     id: 1,
     email: 'string',
@@ -30,8 +31,12 @@ describe('MeComponent', () => {
     createdAt: new Date(),
     updatedAt: new Date()
   };
+  let spyHistoryBack: jest.SpyInstance
   
   beforeEach(async () => {
+    matSnackBarMock = {
+      open: jest.fn()
+    } as any
     mockSessionService = {
       sessionInformation: { admin: true, id: 1 },
       logOut: jest.fn()
@@ -45,6 +50,7 @@ describe('MeComponent', () => {
     router = {
       navigate: jest.fn()
     } as any;
+
     await TestBed.configureTestingModule({
       declarations: [MeComponent],
       imports: [
@@ -58,6 +64,7 @@ describe('MeComponent', () => {
       providers: [
         {provide: SessionService, useValue: mockSessionService},
         {provide: UserService, useValue: mockUserService},
+        {provide: MatSnackBar, useValue: matSnackBarMock},
         {provide: Router, useValue: router}
       ],
     })
@@ -66,6 +73,12 @@ describe('MeComponent', () => {
     fixture = TestBed.createComponent(MeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    spyHistoryBack = jest.spyOn(window.history, 'back');
+  });
+
+  // Cleanup after each test
+  afterEach(() => {
+    spyHistoryBack.mockRestore(); 
   });
 
   it('should create', () => {
@@ -74,7 +87,22 @@ describe('MeComponent', () => {
 
   it('should get userById and subscribe to user observable', () => {
     component.ngOnInit()
-    expect(mockUserService).toHaveBeenCalledWith('1')
+    expect(mockUserService.getById).toHaveBeenCalledWith('1')
     expect(component.user).toEqual(mockUser)
+  })
+
+  it('should go back to the previous page', () => {
+    component.back()
+    expect(spyHistoryBack).toHaveBeenCalled()
+  })
+
+  it('should delete the user account', () => {
+    component.delete()
+    expect(mockUserService.delete).toHaveBeenCalledWith('1')
+    expect(matSnackBarMock.open).toHaveBeenCalledWith(
+      'Your account has been deleted !',
+      'Close',
+      { duration: 3000 }
+    )
   })
 });
