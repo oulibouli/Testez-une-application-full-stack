@@ -17,10 +17,10 @@ describe('MeComponent', () => {
   let component: MeComponent;
   let fixture: ComponentFixture<MeComponent>;
 
-  let mockSessionService: jest.Mocked<SessionService>
-  let mockUserService: jest.Mocked<UserService>
-  let router: jest.Mocked<Router>
-  let matSnackBarMock: jest.Mocked<MatSnackBar>
+  let mockSessionService: Partial<SessionService>
+  let mockUserService: Partial<UserService>
+  let router: Partial<Router>
+  let matSnackBarMock: Partial<MatSnackBar>
   const mockUser: User = {
     id: 1,
     email: 'string',
@@ -36,20 +36,28 @@ describe('MeComponent', () => {
   beforeEach(async () => {
     matSnackBarMock = {
       open: jest.fn()
-    } as any
+    }
     mockSessionService = {
-      sessionInformation: { admin: true, id: 1 },
+      sessionInformation: {
+        token: '1234',
+        type: 'Bearer',
+        id: 1,
+        username: 'username',
+        firstName: 'user',
+        lastName: 'name',
+        admin: false
+      },
       logOut: jest.fn()
-    } as any;
+    }
     mockUserService = {
       getById: jest.fn().mockReturnValue(of(mockUser)),
       delete: jest.fn().mockReturnValue(of(null))
-    } as any; 
+    }; 
 
     // Création d'un mock pour Router
     router = {
       navigate: jest.fn()
-    } as any;
+    }
 
     await TestBed.configureTestingModule({
       declarations: [MeComponent],
