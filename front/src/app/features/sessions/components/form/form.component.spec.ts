@@ -1,31 +1,72 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {  ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { expect } from '@jest/globals';
 import { SessionService } from 'src/app/services/session.service';
 import { SessionApiService } from '../../services/session-api.service';
 
 import { FormComponent } from './form.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('FormComponent', () => {
   let component: FormComponent;
   let fixture: ComponentFixture<FormComponent>;
+  let router: Router;
+  let route: ActivatedRoute;
+  let mockSessionApiService: Partial<SessionApiService>
+  let matSnackBarMock: Partial<MatSnackBar>
 
   const mockSessionService = {
     sessionInformation: {
       admin: true
     }
-  } 
+  }
 
   beforeEach(async () => {
+    mockSessionApiService = {
+      detail: jest.fn().mockReturnValue(of({
+        id: 426,
+        name: 'name',
+        description: 'desc',
+        date: new Date("2024-08-22T10:32:09.475Z"),
+        teacher_id: 1,
+        users: [123],
+        createdAt: new Date("2024-08-22T10:32:09.475Z"),
+        updatedAt: new Date("2024-08-22T10:32:09.475Z")
+      })),
+      create: jest.fn().mockReturnValue(of({
+        id: 426,
+        name: 'name',
+        description: 'desc',
+        date: new Date("2024-08-22T10:32:09.475Z"),
+        teacher_id: 1,
+        users: [123],
+        createdAt: new Date("2024-08-22T10:32:09.475Z"),
+        updatedAt: new Date("2024-08-22T10:32:09.475Z")
+      })),
+      update: jest.fn().mockReturnValue(of({
+        id: 426,
+        name: 'name',
+        description: 'desc',
+        date: new Date("2024-08-22T10:32:09.475Z"),
+        teacher_id: 1,
+        users: [123],
+        createdAt: new Date("2024-08-22T10:32:09.475Z"),
+        updatedAt: new Date("2024-08-22T10:32:09.475Z")
+      })),
+    }
+    matSnackBarMock = {
+      open: jest.fn()
+    }
     await TestBed.configureTestingModule({
 
       imports: [
@@ -38,11 +79,22 @@ describe('FormComponent', () => {
         ReactiveFormsModule, 
         MatSnackBarModule,
         MatSelectModule,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        NoopAnimationsModule
       ],
       providers: [
         { provide: SessionService, useValue: mockSessionService },
-        SessionApiService
+        { provide: SessionApiService, useValue: mockSessionApiService },
+        {provide: MatSnackBar, useValue: matSnackBarMock},
+        { provide: ActivatedRoute,
+          useValue: { 
+            snapshot: { 
+              paramMap: {
+                get: jest.fn() 
+              }
+            } 
+          }
+        }
       ],
       declarations: [FormComponent]
     })
@@ -51,9 +103,70 @@ describe('FormComponent', () => {
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    router = TestBed.inject(Router);
+    route = TestBed.inject(ActivatedRoute)
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  it('should navigate to /sessions if not an admin', () => {
+    mockSessionService.sessionInformation.admin = false
+    jest.spyOn(router,'navigate')
+
+    component.ngOnInit()
+    expect(router.navigate).toHaveBeenCalledWith(['/sessions'])
+  })
+  it('should fetch session details and initialize form if URL contains "update"', () => {
+    const mockId = '426'
+
+    mockSessionService.sessionInformation.admin = true
+    jest.spyOn(router, 'url', 'get').mockReturnValue(`/update/${mockId}`)
+    jest.spyOn(route.snapshot.paramMap, 'get').mockReturnValue(mockId)
+    const detailSpy = jest.spyOn(mockSessionApiService, 'detail');
+
+    component.ngOnInit()
+    expect(detailSpy).toHaveBeenCalledWith(mockId)
+  })
+
+  it('should create a session if not an update', () => {
+    component.onUpdate = false
+    jest.spyOn(router,'navigate')
+    const mockSession = {
+      name: 'name',
+      description: 'desc',
+      date: new Date("2024-08-22T10:32:09.475Z"),
+      teacher_id: 1
+    }
+
+    component.sessionForm?.setValue(mockSession)
+
+
+    component.submit()
+
+    expect(mockSessionApiService.create).toHaveBeenCalledWith(mockSession)
+    expect(matSnackBarMock.open).toHaveBeenCalledWith('Session created !', 'Close', { duration: 3000 })
+    expect(router.navigate).toHaveBeenCalledWith(['sessions'])
+  })
+  
+  it('should update a session if an update', () => {
+    component.onUpdate = true;
+    jest.spyOn(router,'navigate');
+    (component as any).id = '1'
+    const mockSession = {
+      name: 'name',
+      description: 'desc',
+      date: new Date("2024-08-22T10:32:09.475Z"),
+      teacher_id: 1
+    }
+    const mockId = '1'
+
+    component.sessionForm?.setValue(mockSession)
+
+    component.submit()
+
+    expect(mockSessionApiService.update).toHaveBeenCalledWith(mockId, mockSession)
+    expect(matSnackBarMock.open).toHaveBeenCalledWith('Session updated !', 'Close', { duration: 3000 })
+    expect(router.navigate).toHaveBeenCalledWith(['sessions'])
+  })
 });
