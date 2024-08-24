@@ -15,6 +15,7 @@ import { Router } from '@angular/router';
 import { Session } from '../../interfaces/session.interface';
 import { Teacher } from 'src/app/interfaces/teacher.interface';
 import { TeacherService } from 'src/app/services/teacher.service';
+import { By } from '@angular/platform-browser';
 
 describe('DetailComponent', () => {
   let component: DetailComponent;
@@ -49,7 +50,9 @@ describe('DetailComponent', () => {
         users: [123],
         teacher_id: 456,
         description: 'desc',
-        date: new Date("2024-08-22T10:32:09.475Z")
+        date: new Date("2024-08-22T10:32:09.475Z"),
+        createdAt: new Date("2024-08-21T10:32:09.475Z"),
+        updatedAt: new Date("2024-08-23T10:32:09.475Z")
       })),
       delete: jest.fn().mockReturnValue(of({})),
       participate: jest.fn().mockReturnValue(of({})),
@@ -136,7 +139,9 @@ describe('DetailComponent', () => {
         users: [123],
         teacher_id: 456,
         description: 'desc',
-        date: new Date("2024-08-22T10:32:09.475Z")
+        date: new Date("2024-08-22T10:32:09.475Z"),
+        createdAt: new Date("2024-08-21T10:32:09.475Z"),
+        updatedAt: new Date("2024-08-23T10:32:09.475Z")
     }
 
     const participateSpy = jest.spyOn(mockSessionApiService, 'participate').mockReturnValue(of())
@@ -167,7 +172,9 @@ describe('DetailComponent', () => {
         users: [123],
         teacher_id: 456,
         description: 'desc',
-        date: new Date("2024-08-22T10:32:09.475Z")
+        date: new Date("2024-08-22T10:32:09.475Z"),
+        createdAt: new Date("2024-08-21T10:32:09.475Z"),
+        updatedAt: new Date("2024-08-23T10:32:09.475Z")
     }
 
     const unParticipateSpy = jest.spyOn(mockSessionApiService, 'unParticipate').mockReturnValue(of())
@@ -178,6 +185,29 @@ describe('DetailComponent', () => {
     fixture.detectChanges()
     expect(component.session).toEqual(mockSession)
     expect(component.teacher).toEqual(mockTeacher)
+
+  })
+
+  it('should display delete button if user is admin', () => {
+    component.isAdmin = true
+    const deleteButton = fixture.debugElement.query(By.css(`button[ng-reflect-ng-click="delete()"]`))
+    expect(deleteButton).toBeTruthy
+  })
+
+  it('should display sessions dom elements correctly', () => {
+    const sessionName = fixture.debugElement.query(By.css('h1'))
+    expect(sessionName.nativeElement.textContent).toContain('Test Session')
+    const spans = fixture.debugElement.query(By.css('.my2')).nativeElement.querySelectorAll('span')
+    const sessionUsers = spans[0];
+    const sessionDate = spans[1];
+    expect(sessionUsers.textContent).toContain('1 attendees')
+    expect(sessionDate.textContent).toContain('August 22, 2024')
+    const sessionDescription = fixture.debugElement.query(By.css('.description'))
+    expect(sessionDescription.nativeElement.textContent).toContain('desc')
+    const sessionCreated = fixture.debugElement.query(By.css('.created'))
+    expect(sessionCreated.nativeElement.textContent).toContain('Create at:  August 21, 2024')
+    const sessionUpdated = fixture.debugElement.query(By.css('.updated'))
+    expect(sessionUpdated.nativeElement.textContent).toContain('Last update:  August 23, 2024')
 
   })
 });

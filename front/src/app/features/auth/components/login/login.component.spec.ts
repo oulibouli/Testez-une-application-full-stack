@@ -90,7 +90,7 @@ describe('LoginComponent', () => {
   })
 
   it('should set error to true when login fails', () => {
-    const loginErrorMock = new Error('login failed');
+    const loginErrorMock = new Error('Invalid credentials');
     (mockAuthService.login as jest.Mock).mockReturnValueOnce(throwError(() => loginErrorMock))
 
     const mockLoginRequest: LoginRequest = {

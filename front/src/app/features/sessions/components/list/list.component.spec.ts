@@ -6,6 +6,7 @@ import { expect } from '@jest/globals';
 import { SessionService } from 'src/app/services/session.service';
 
 import { ListComponent } from './list.component';
+import { By } from '@angular/platform-browser';
 
 describe('ListComponent', () => {
   let component: ListComponent;
@@ -33,4 +34,28 @@ describe('ListComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should call user and return the session infos', () => {
+    expect(component.user).toEqual(mockSessionService.sessionInformation)
+  })
+  it('should display create and detail button if admin', () => {
+    // Detect changes in the template
+    fixture.detectChanges()
+    const createButton = fixture.debugElement.query(By.css('button[routerLink="create"]'))
+    expect(createButton).toBeTruthy
+
+    const detailButton = fixture.debugElement.query(By.css(`button[routerLink="['detail',session.id]"]`))
+    expect(detailButton).toBeTruthy
+  })
+
+  it('should not display create and detail button if not admin', () => {
+    mockSessionService.sessionInformation.admin = false
+    // Detect changes in the template
+    fixture.detectChanges()
+    const createButton = fixture.debugElement.query(By.css('button[routerLink="create"]'))
+    expect(createButton).toBeFalsy
+
+    const detailButton = fixture.debugElement.query(By.css(`button[routerLink="['detail',session.id]"]`))
+    expect(detailButton).toBeFalsy
+  })
 });
