@@ -1,7 +1,20 @@
 describe('Login spec', () => {
-  it('Login successfull', () => {
+  beforeEach(() => {
     cy.visit('/login')
+  })
 
+  it('should display login form', () => {
+    cy.get('form').should('be.visible')
+  })
+  it('should display error on incorrect login', () => {
+    // Soumettre le formulaire avec des informations incorrectes
+    cy.get('input[formControlName="email"]').type('invalidemail');
+    cy.get('input[formControlName="password"]').type(`${"tqdqs"}{enter}{enter}`);
+    
+    // Vérifier que le message d'erreur est affiché
+    cy.get('.error').should('contain', 'An error occurred');
+  });
+  it('Login successfull', () => {
     cy.intercept('POST', '/api/auth/login', {
       body: {
         id: 1,

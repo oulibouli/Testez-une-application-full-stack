@@ -24,4 +24,5 @@ module.exports = {
   moduleDirectories: [
     "node_modules"
   ],
+  exclude: ["cypress","./cypress.config.ts"]
 };
