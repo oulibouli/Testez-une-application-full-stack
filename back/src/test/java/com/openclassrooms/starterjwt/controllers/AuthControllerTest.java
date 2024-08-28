@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -82,6 +83,10 @@ public class AuthControllerTest {
         assertEquals("firstname", jwtResponse.getFirstName());
         assertEquals("lastname", jwtResponse.getLastName());
         assertTrue(jwtResponse.getAdmin());
+
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtUtils).generateJwtToken(authentication);
+        verify(userRepository).findByEmail("user@test.com");
     }
     @Test
     void testAuthenticateUserIsNull() {
@@ -125,6 +130,10 @@ public class AuthControllerTest {
         assertEquals(HttpStatus.OK, res.getStatusCode());
         MessageResponse message = (MessageResponse) res.getBody();
         assertEquals("User registered successfully!", message.getMessage());
+
+        verify(userRepository).existsByEmail("test@test.com");
+        verify(passwordEncoder).encode("password");
+        verify(userRepository).save(any(User.class));
     }
     @Test
     void testRegisterUserNotValid() {

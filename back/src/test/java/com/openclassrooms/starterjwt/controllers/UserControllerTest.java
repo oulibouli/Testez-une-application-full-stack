@@ -2,6 +2,7 @@ package com.openclassrooms.starterjwt.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -97,6 +97,9 @@ public class UserControllerTest {
         ResponseEntity<?> res = userController.save(mockId.toString());
 
         assertEquals(HttpStatus.OK, res.getStatusCode());
+
+        verify(userService).findById(mockId);
+        verify(userService).delete(mockId);
     }
     @Test
     void testDeleteByIdIsNull() {
@@ -132,5 +135,7 @@ public class UserControllerTest {
         ResponseEntity<?> res = userController.save(mockId.toString());
 
         assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
+
+        verify(userService).findById(mockId);
     }
 }
