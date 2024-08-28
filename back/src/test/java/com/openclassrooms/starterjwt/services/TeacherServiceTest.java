@@ -21,13 +21,13 @@ import com.openclassrooms.starterjwt.repository.TeacherRepository;
 public class TeacherServiceTest {
     @Mock
     private TeacherRepository teacherRepository;
+    @Mock
     private Teacher mockedTeacher;
     private TeacherService teacherService;
 
     @BeforeEach
     void setUp() {
         teacherService = new TeacherService(teacherRepository);
-        mockedTeacher = mock(Teacher.class);
     }
 
     @Test
