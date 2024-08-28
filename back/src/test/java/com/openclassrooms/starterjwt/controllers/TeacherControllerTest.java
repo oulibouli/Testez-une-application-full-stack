@@ -50,7 +50,7 @@ public class TeacherControllerTest {
 
         TeacherDto resultTeacherDto = (TeacherDto) res.getBody();
 
-        assertEquals(resultTeacherDto, resultTeacherDto);
+        assertEquals(mockedTeacherDto, resultTeacherDto);
     }
 
     @Test
