@@ -1,20 +1,21 @@
-package com.openclassrooms.starterjwt.controllers;
+package com.openclassrooms.starterjwt.unitaire.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.openclassrooms.starterjwt.controllers.TeacherController;
 import com.openclassrooms.starterjwt.dto.TeacherDto;
 import com.openclassrooms.starterjwt.mapper.TeacherMapper;
 import com.openclassrooms.starterjwt.models.Teacher;
@@ -30,11 +31,12 @@ public class TeacherControllerTest {
     private Teacher mockedTeacher;
     @Mock
     private TeacherDto mockedTeacherDto;
+    // Create the instance with mocked dependencies
+    @InjectMocks
     TeacherController teacherController;
 
     @BeforeEach
     void setUp() {
-        teacherController = new TeacherController(teacherService, teacherMapper);
     }
 
     @Test

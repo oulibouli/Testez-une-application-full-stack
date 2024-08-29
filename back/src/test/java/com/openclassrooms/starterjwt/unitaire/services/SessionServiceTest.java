@@ -1,4 +1,4 @@
-package com.openclassrooms.starterjwt.services;
+package com.openclassrooms.starterjwt.unitaire.services;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -25,6 +26,7 @@ import com.openclassrooms.starterjwt.models.Teacher;
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.repository.SessionRepository;
 import com.openclassrooms.starterjwt.repository.UserRepository;
+import com.openclassrooms.starterjwt.services.SessionService;
 
 @ExtendWith(MockitoExtension.class)
 public class SessionServiceTest {
@@ -32,6 +34,8 @@ public class SessionServiceTest {
     private SessionRepository sessionRepository;
     @Mock
     private UserRepository userRepository;
+    // Create the SessionService instance with mocked dependencies
+    @InjectMocks
     private SessionService sessionService;
     private Session session;
     private User mockedUser;
@@ -41,8 +45,6 @@ public class SessionServiceTest {
     void setUp() {
         LocalDateTime currentTime = LocalDateTime.now();
         Date currentDate = Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant());
-        // Create the SessionService instance with mocked dependencies
-        sessionService = new SessionService(sessionRepository, userRepository);
 
         Teacher teacher = new Teacher();
 

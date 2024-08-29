@@ -1,18 +1,18 @@
-package com.openclassrooms.starterjwt.controllers;
+package com.openclassrooms.starterjwt.unitaire.controllers;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.openclassrooms.starterjwt.controllers.AuthController;
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.payload.request.LoginRequest;
 import com.openclassrooms.starterjwt.payload.request.SignupRequest;
@@ -36,6 +37,8 @@ public class AuthControllerTest {
     private UserRepository userRepository;
     @Mock
     private User mockedUser;
+    // Create the instance with mocked dependencies
+    @InjectMocks
     private AuthController authController;
     @Mock
     private AuthenticationManager authenticationManager;
@@ -54,7 +57,6 @@ public class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        authController = new AuthController(authenticationManager, passwordEncoder, jwtUtils, userRepository);
     }
 
     @Test

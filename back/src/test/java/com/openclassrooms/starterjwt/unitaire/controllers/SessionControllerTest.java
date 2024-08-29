@@ -1,21 +1,21 @@
-package com.openclassrooms.starterjwt.controllers;
+package com.openclassrooms.starterjwt.unitaire.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.openclassrooms.starterjwt.controllers.SessionController;
 import com.openclassrooms.starterjwt.dto.SessionDto;
 import com.openclassrooms.starterjwt.mapper.SessionMapper;
 import com.openclassrooms.starterjwt.models.Session;
@@ -28,6 +28,8 @@ public class SessionControllerTest {
     private SessionService sessionService;
     @Mock
     private SessionMapper sessionMapper;
+    // Create the instance with mocked dependencies
+    @InjectMocks
     private SessionController sessionController;
     @Mock
     private SessionDto mockedSessionDto;
@@ -38,7 +40,6 @@ public class SessionControllerTest {
 
     @BeforeEach
     void setUp() {
-        sessionController = new SessionController(sessionService, sessionMapper);
     }
 
     @Test

@@ -1,14 +1,14 @@
-package com.openclassrooms.starterjwt.controllers;
+package com.openclassrooms.starterjwt.unitaire.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.openclassrooms.starterjwt.controllers.UserController;
 import com.openclassrooms.starterjwt.dto.UserDto;
 import com.openclassrooms.starterjwt.mapper.UserMapper;
 import com.openclassrooms.starterjwt.models.User;
@@ -28,6 +29,8 @@ public class UserControllerTest {
     private UserService userService;
     @Mock
     private UserMapper userMapper;
+    // Create the instance with mocked dependencies
+    @InjectMocks
     private UserController userController;
     @Mock
     private User mockedUser;
@@ -42,7 +45,6 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userController = new UserController(userService, userMapper);
         
     }
 
