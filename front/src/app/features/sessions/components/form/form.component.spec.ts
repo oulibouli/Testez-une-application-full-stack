@@ -22,16 +22,18 @@ describe('FormComponent', () => {
   let fixture: ComponentFixture<FormComponent>;
   let router: Router;
   let route: ActivatedRoute;
-  let mockSessionApiService: Partial<SessionApiService>
-  let matSnackBarMock: Partial<MatSnackBar>
+  let mockSessionApiService: Partial<SessionApiService>;
+  let matSnackBarMock: Partial<MatSnackBar>;
 
+  // Mock the session service with admin rights
   const mockSessionService = {
     sessionInformation: {
       admin: true
     }
-  }
+  };
 
   beforeEach(async () => {
+    // Mock the services used by the component
     mockSessionApiService = {
       detail: jest.fn().mockReturnValue(of({
         id: 426,
@@ -63,12 +65,13 @@ describe('FormComponent', () => {
         createdAt: new Date("2024-08-22T10:32:09.475Z"),
         updatedAt: new Date("2024-08-22T10:32:09.475Z")
       })),
-    }
+    };
     matSnackBarMock = {
       open: jest.fn()
-    }
-    await TestBed.configureTestingModule({
+    };
 
+    // Configure the testing module
+    await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
         HttpClientModule,
@@ -85,7 +88,7 @@ describe('FormComponent', () => {
       providers: [
         { provide: SessionService, useValue: mockSessionService },
         { provide: SessionApiService, useValue: mockSessionApiService },
-        {provide: MatSnackBar, useValue: matSnackBarMock},
+        { provide: MatSnackBar, useValue: matSnackBarMock },
         { provide: ActivatedRoute,
           useValue: { 
             snapshot: { 
@@ -100,73 +103,80 @@ describe('FormComponent', () => {
     })
       .compileComponents();
 
+    // Initialize component, router, and activated route
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
     router = TestBed.inject(Router);
-    route = TestBed.inject(ActivatedRoute)
+    route = TestBed.inject(ActivatedRoute);
   });
 
+  // Verify that the component is created successfully
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // Test navigation to /sessions if the user is not an admin
   it('should navigate to /sessions if not an admin', () => {
-    mockSessionService.sessionInformation.admin = false
-    jest.spyOn(router,'navigate')
+    mockSessionService.sessionInformation.admin = false;
+    jest.spyOn(router, 'navigate');
 
-    component.ngOnInit()
-    expect(router.navigate).toHaveBeenCalledWith(['/sessions'])
-  })
+    component.ngOnInit();
+    expect(router.navigate).toHaveBeenCalledWith(['/sessions']);
+  });
+
+  // Test fetching session details and initializing the form if URL contains "update"
   it('should fetch session details and initialize form if URL contains "update"', () => {
-    const mockId = '426'
+    const mockId = '426';
 
-    mockSessionService.sessionInformation.admin = true
-    jest.spyOn(router, 'url', 'get').mockReturnValue(`/update/${mockId}`)
-    jest.spyOn(route.snapshot.paramMap, 'get').mockReturnValue(mockId)
+    mockSessionService.sessionInformation.admin = true;
+    jest.spyOn(router, 'url', 'get').mockReturnValue(`/update/${mockId}`);
+    jest.spyOn(route.snapshot.paramMap, 'get').mockReturnValue(mockId);
     const detailSpy = jest.spyOn(mockSessionApiService, 'detail');
 
-    component.ngOnInit()
-    expect(detailSpy).toHaveBeenCalledWith(mockId)
-  })
+    component.ngOnInit();
+    expect(detailSpy).toHaveBeenCalledWith(mockId);
+  });
 
+  // Test creating a session when not updating an existing one
   it('should create a session if not an update', () => {
-    component.onUpdate = false
-    jest.spyOn(router,'navigate')
+    component.onUpdate = false;
+    jest.spyOn(router, 'navigate');
     const mockSession = {
       name: 'name',
       description: 'desc',
       date: new Date("2024-08-22T10:32:09.475Z"),
       teacher_id: 1
-    }
+    };
 
-    component.sessionForm?.setValue(mockSession)
+    component.sessionForm?.setValue(mockSession);
 
+    component.submit();
 
-    component.submit()
-
-    expect(mockSessionApiService.create).toHaveBeenCalledWith(mockSession)
-    expect(matSnackBarMock.open).toHaveBeenCalledWith('Session created !', 'Close', { duration: 3000 })
-    expect(router.navigate).toHaveBeenCalledWith(['sessions'])
-  })
+    expect(mockSessionApiService.create).toHaveBeenCalledWith(mockSession);
+    expect(matSnackBarMock.open).toHaveBeenCalledWith('Session created !', 'Close', { duration: 3000 });
+    expect(router.navigate).toHaveBeenCalledWith(['sessions']);
+  });
   
+  // Test updating an existing session
   it('should update a session if an update', () => {
     component.onUpdate = true;
-    jest.spyOn(router,'navigate');
-    (component as any).id = '1'
+    jest.spyOn(router, 'navigate');
+    (component as any).id = '1';
     const mockSession = {
       name: 'name',
       description: 'desc',
       date: new Date("2024-08-22T10:32:09.475Z"),
       teacher_id: 1
-    }
-    const mockId = '1'
+    };
+    const mockId = '1';
 
-    component.sessionForm?.setValue(mockSession)
+    component.sessionForm?.setValue(mockSession);
 
-    component.submit()
+    component.submit();
 
-    expect(mockSessionApiService.update).toHaveBeenCalledWith(mockId, mockSession)
-    expect(matSnackBarMock.open).toHaveBeenCalledWith('Session updated !', 'Close', { duration: 3000 })
-    expect(router.navigate).toHaveBeenCalledWith(['sessions'])
-  })
+    expect(mockSessionApiService.update).toHaveBeenCalledWith(mockId, mockSession);
+    expect(matSnackBarMock.open).toHaveBeenCalledWith('Session updated !', 'Close', { duration: 3000 });
+    expect(router.navigate).toHaveBeenCalledWith(['sessions']);
+  });
 });

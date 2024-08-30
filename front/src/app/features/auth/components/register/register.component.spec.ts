@@ -18,12 +18,15 @@ describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let mockAuthService: Partial<AuthService>;
-  let router: Router
+  let router: Router;
 
   beforeEach(async () => {
+    // Mock the AuthService with a successful registration response
     mockAuthService = {
       register: jest.fn().mockReturnValue(of(null))
-    }
+    };
+    
+    // Configure the testing module
     await TestBed.configureTestingModule({
       declarations: [RegisterComponent],
       providers: [
@@ -41,45 +44,57 @@ describe('RegisterComponent', () => {
     })
       .compileComponents();
 
+    // Create the component instance and trigger change detection
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
     router = TestBed.inject(Router);
   });
 
+  // Verify that the component is created successfully
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
+  // Test the registration process and navigation to the login page
   it('should register user and navigate to /login', () => {
+    // Define a mock registration request
     const mockRegisterRequest: RegisterRequest = {
         email: 'test@test.com',
         firstName: 'firstname',
         lastName: 'lastname',
         password: 'password'
-    }
-    component.form.setValue(mockRegisterRequest)
-    jest.spyOn(router, 'navigate')
-    component.submit()
-    expect(mockAuthService.register).toHaveBeenCalled()
-    expect(router.navigate).toHaveBeenCalledWith(['/login'])
-  })
+    };
+    
+    // Set form values and submit the form
+    component.form.setValue(mockRegisterRequest);
+    jest.spyOn(router, 'navigate');
+    component.submit();
+    
+    // Verify the interactions and navigation
+    expect(mockAuthService.register).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
 
+  // Test handling of registration failure with an error
   it('should send an error when register fails', () => {
+    // Simulate a registration failure
     const mockError = new Error('register failed');
-    (mockAuthService.register as jest.Mock).mockReturnValueOnce(throwError(() => mockError))
+    (mockAuthService.register as jest.Mock).mockReturnValueOnce(throwError(() => mockError));
 
+    // Define a mock registration request
     const mockRegisterRequest: RegisterRequest = {
       email: 'test@test.com',
       firstName: 'firstname',
       lastName: 'lastname',
       password: 'password'
-    }
-    component.form.setValue(mockRegisterRequest)
+    };
+    
+    // Set form values and submit the form
+    component.form.setValue(mockRegisterRequest);
+    component.submit();
 
-    component.submit()
-
-    expect(component.onError).toBeTruthy()
-
-  })
+    // Verify that the error flag is set to true
+    expect(component.onError).toBeTruthy();
+  });
 });

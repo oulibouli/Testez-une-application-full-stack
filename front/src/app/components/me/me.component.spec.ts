@@ -54,7 +54,7 @@ describe('MeComponent', () => {
       delete: jest.fn().mockReturnValue(of(null))
     }; 
 
-    // Création d'un mock pour Router
+    // Create a mock for Router
     router = {
       navigate: jest.fn()
     }
@@ -89,21 +89,25 @@ describe('MeComponent', () => {
     spyHistoryBack.mockRestore(); 
   });
 
+  // Verify that the component is created successfully
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
+  // Test that ngOnInit retrieves the user by ID and subscribes to the observable
   it('should get userById and subscribe to user observable', () => {
     component.ngOnInit()
     expect(mockUserService.getById).toHaveBeenCalledWith('1')
     expect(component.user).toEqual(mockUser)
   })
 
+  // Test the back method, which navigates to the previous page
   it('should go back to the previous page', () => {
     component.back()
     expect(spyHistoryBack).toHaveBeenCalled()
   })
 
+  // Test the delete method, which deletes the user account
   it('should delete the user account', () => {
     component.delete()
     expect(mockUserService.delete).toHaveBeenCalledWith('1')
