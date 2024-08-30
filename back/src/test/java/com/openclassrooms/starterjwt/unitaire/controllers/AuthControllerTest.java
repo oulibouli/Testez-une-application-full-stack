@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,34 +35,48 @@ import com.openclassrooms.starterjwt.security.services.UserDetailsImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
+
     @Mock
     private UserRepository userRepository;
+    
     @Mock
     private User mockedUser;
+
     // Create the instance with mocked dependencies
     @InjectMocks
     private AuthController authController;
+    
     @Mock
     private AuthenticationManager authenticationManager;
+    
     @Mock
     private Authentication authentication;
+    
     @Mock
     private PasswordEncoder passwordEncoder;
+    
     @Mock
     private JwtUtils jwtUtils;
+    
     @Mock
     private LoginRequest loginRequest;
+    
     @Mock
     SignupRequest signupRequest;
+    
     @Mock
     private UserDetailsImpl userDetailsImpl;
 
     @BeforeEach
     void setUp() {
+        // No specific setup required for this test
     }
 
     @Test
+    @Tag("Auth")
+    @DisplayName("Test valid user authentication should return a JWT response")
     void testAuthenticateUserValid() {
+        // Arrange: Set up mock responses
         String mockToken = "154612dfssqdqsdqsdqsdqsdqsdsqdf544ffze";
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetailsImpl);
@@ -74,8 +90,10 @@ public class AuthControllerTest {
 
         when(userRepository.findByEmail(userDetailsImpl.getUsername())).thenReturn(Optional.of(mockedUser));
     
+        // Act: Call the method under test
         ResponseEntity<?> res = authController.authenticateUser(loginRequest);
 
+        // Assert: Verify the response
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertTrue(res.getBody() instanceof JwtResponse);
         JwtResponse jwtResponse = (JwtResponse) res.getBody();
@@ -86,12 +104,17 @@ public class AuthControllerTest {
         assertEquals("lastname", jwtResponse.getLastName());
         assertTrue(jwtResponse.getAdmin());
 
+        // Verify interactions with mocks
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtUtils).generateJwtToken(authentication);
         verify(userRepository).findByEmail("user@test.com");
     }
+
     @Test
+    @Tag("Auth")
+    @DisplayName("Test user authentication when user is not found should return default JWT response")
     void testAuthenticateUserIsNull() {
+        // Arrange: Set up mock responses
         String mockToken = "154612dfssqdqsdqsdqsdqsdqsdsqdf544ffze";
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetailsImpl);
@@ -104,8 +127,10 @@ public class AuthControllerTest {
 
         when(userRepository.findByEmail(userDetailsImpl.getUsername())).thenReturn(Optional.empty());
     
+        // Act: Call the method under test
         ResponseEntity<?> res = authController.authenticateUser(loginRequest);
 
+        // Assert: Verify the response
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertTrue(res.getBody() instanceof JwtResponse);
         JwtResponse jwtResponse = (JwtResponse) res.getBody();
@@ -118,7 +143,10 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Tag("Auth")
+    @DisplayName("Test valid user registration should return success message")
     void testRegisterUserValid() {
+        // Arrange: Set up mock responses
         when(signupRequest.getEmail()).thenReturn("test@test.com");
         when(signupRequest.getLastName()).thenReturn("lastname");
         when(signupRequest.getFirstName()).thenReturn("firstname");
@@ -127,22 +155,31 @@ public class AuthControllerTest {
         when(userRepository.existsByEmail(signupRequest.getEmail())).thenReturn(false);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
 
+        // Act: Call the method under test
         ResponseEntity<?> res = authController.registerUser(signupRequest);
 
+        // Assert: Verify the response
         assertEquals(HttpStatus.OK, res.getStatusCode());
         MessageResponse message = (MessageResponse) res.getBody();
         assertEquals("User registered successfully!", message.getMessage());
 
+        // Verify interactions with mocks
         verify(userRepository).existsByEmail("test@test.com");
         verify(passwordEncoder).encode("password");
         verify(userRepository).save(any(User.class));
     }
+
     @Test
+    @Tag("Auth")
+    @DisplayName("Test user registration with existing email should return error message")
     void testRegisterUserNotValid() {
+        // Arrange: Set up mock responses
         when(userRepository.existsByEmail(signupRequest.getEmail())).thenReturn(true);
 
+        // Act: Call the method under test
         ResponseEntity<?> res = authController.registerUser(signupRequest);
 
+        // Assert: Verify the response
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
         MessageResponse message = (MessageResponse) res.getBody();
         assertEquals("Error: Email is already taken!", message.getMessage());

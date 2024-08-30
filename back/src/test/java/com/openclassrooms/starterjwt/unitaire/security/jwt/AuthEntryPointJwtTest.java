@@ -1,10 +1,8 @@
 package com.openclassrooms.starterjwt.unitaire.security.jwt;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -12,17 +10,19 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.AuthenticationException;
 
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openclassrooms.starterjwt.security.jwt.AuthEntryPointJwt;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,8 +41,10 @@ public class AuthEntryPointJwtTest {
     private AuthEntryPointJwt authEntryPointJwt;
 
     @Test
+    @Tag("Security")
+    @DisplayName("Test commence method should set unauthorized response with JSON body")
     void testCommence() throws IOException, ServletException {
-        // Arrange
+        // Arrange: Set up mock responses
         when(authException.getMessage()).thenReturn("Unauthorized error");
         when(request.getServletPath()).thenReturn("/test-path");
 
@@ -66,10 +68,10 @@ public class AuthEntryPointJwtTest {
         };
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        // Act
+        // Act: Call the method under test
         authEntryPointJwt.commence(request, response, authException);
 
-        // Assert
+        // Assert: Verify the response
         verify(response).setContentType("application/json");
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 

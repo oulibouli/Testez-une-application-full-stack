@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,18 +32,22 @@ import com.openclassrooms.starterjwt.services.SessionService;
 
 @ExtendWith(MockitoExtension.class)
 public class SessionServiceTest {
+
     @Mock
     private SessionRepository sessionRepository;
+
     @Mock
     private UserRepository userRepository;
+
     // Create the SessionService instance with mocked dependencies
     @InjectMocks
     private SessionService sessionService;
+
     @Mock
     private Session session;
+
     @Mock
     private User mockedUser;
-
 
     @BeforeEach
     void setUp() {
@@ -60,143 +66,184 @@ public class SessionServiceTest {
     }
 
     @Test
+    @Tag("Create")
+    @DisplayName("Test createSession should save and return the session")
     void createSession() {
-        // Prepare a session
+        // Arrange: Prepare a session
         when(sessionRepository.save(session)).thenReturn(session);
 
+        // Act: Call the create method
         Session createdSession = sessionService.create(session);
 
+        // Assert: Verify that the session was saved and returned correctly
         verify(sessionRepository).save(session);
         assertEquals(session, createdSession);
     }
 
     @Test 
+    @Tag("Delete")
+    @DisplayName("Test deleteSession should remove the session by ID")
     void deleteSession() {
+        // Arrange: Prepare a session
         Session mockedSession = new Session().setName("Name").setDate(new Date()).setDescription("Description");
         mockedSession.setUsers(new ArrayList<>());
 
+        // Act: Call the delete method
         sessionService.delete(mockedSession.getId());
 
+        // Assert: Verify that the session was deleted by ID
         verify(sessionRepository).deleteById(mockedSession.getId());
     }
 
     @Test
+    @Tag("Read")
+    @DisplayName("Test listSessions should return all sessions")
     void listSessions() {
+        // Arrange: Prepare a list of sessions
         List<Session> sessions = new ArrayList<>();
-
         sessions.add(session);
 
         when(sessionRepository.findAll()).thenReturn(sessions);
 
+        // Act: Call the findAll method
         List<Session> res = sessionService.findAll();
 
+        // Assert: Verify that the list of sessions was returned correctly
         verify(sessionRepository).findAll();
-
         assertEquals(sessions, res);
     }
 
     @Test
+    @Tag("Participate")
+    @DisplayName("Test participateSession should add user to session participants")
     void participateSession() {
-
+        // Arrange: Set up mock responses
         when(userRepository.findById(mockedUser.getId())).thenReturn(Optional.of(mockedUser));
         when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+        // Act: Call the participate method
         sessionService.participate(session.getId(), mockedUser.getId());
 
+        // Assert: Verify that the user was added to the session participants
         verify(sessionRepository).findById(session.getId());
         verify(userRepository).findById(mockedUser.getId());
-
         assertTrue(session.getUsers().contains(mockedUser));
     }
-    @Test
-    void participateSessionNull() {
 
+    @Test
+    @Tag("Participate")
+    @DisplayName("Test participateSession with null session should throw NotFoundException")
+    void participateSessionNull() {
+        // Arrange: Set up mock responses for a null session
         when(userRepository.findById(6L)).thenReturn(Optional.of(mockedUser));
         when(sessionRepository.findById(session.getId())).thenReturn(Optional.empty());
 
+        // Act & Assert: Verify that a NotFoundException is thrown
         assertThrows(NotFoundException.class, () -> {
             sessionService.participate(session.getId(), 6L);
         });
     }
-    @Test
-    void participateSessionUserNull() {
 
+    @Test
+    @Tag("Participate")
+    @DisplayName("Test participateSession with null user should throw NotFoundException")
+    void participateSessionUserNull() {
+        // Arrange: Set up mock responses for a null user
         when(userRepository.findById(6L)).thenReturn(Optional.empty());
         when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
 
+        // Act & Assert: Verify that a NotFoundException is thrown
         assertThrows(NotFoundException.class, () -> {
             sessionService.participate(session.getId(), 6L);
         });
     }
+
     @Test
+    @Tag("Participate")
+    @DisplayName("Test participateSession with already participating user should throw BadRequestException")
     void participateSessionAlreadyParticipate() {
+        // Arrange: Create a user and add them to the session
         User newMockedUser = new User("email@test.com", "lastName", "firstName", "password", false);
         newMockedUser.setId(67L);
 
         Session mockedSession = new Session().setName("Name").setDate(new Date()).setDescription("Description");
         mockedSession.setUsers(new ArrayList<>());
-        
-        // Add the user to the session's user list to simulate participation
         mockedSession.getUsers().add(newMockedUser);
 
+        // Set up mock responses
         when(userRepository.findById(67L)).thenReturn(Optional.of(newMockedUser));
         when(sessionRepository.findById(mockedSession.getId())).thenReturn(Optional.of(mockedSession));
 
+        // Act & Assert: Verify that a BadRequestException is thrown
         assertThrows(BadRequestException.class, () -> {
             sessionService.participate(mockedSession.getId(), newMockedUser.getId());
         });
     }
 
     @Test
+    @Tag("Unparticipate")
+    @DisplayName("Test noLongerParticipateSession should remove user from session participants")
     void noLongerParticipateSession() {
+        // Arrange: Create a user and add them to the session
         User newMockedUser = new User("email@test.com", "lastName", "firstName", "password", false);
         newMockedUser.setId(67L);
 
         Session mockedSession = new Session().setName("Name").setDate(new Date()).setDescription("Description");
         mockedSession.setUsers(new ArrayList<>());
-        
-        // Add the user to the session's user list to simulate participation
         mockedSession.getUsers().add(newMockedUser);
 
-        // Mock the session repository to return the session
+        // Set up mock responses
         when(sessionRepository.findById(mockedSession.getId())).thenReturn(Optional.of(mockedSession));
 
-        // Call the noLongerParticipate method
+        // Act: Call the noLongerParticipate method
         sessionService.noLongerParticipate(mockedSession.getId(), newMockedUser.getId());
 
-        // Verify the interactions and state
+        // Assert: Verify that the user was removed from the session participants
         verify(sessionRepository).findById(mockedSession.getId());
         assertFalse(mockedSession.getUsers().contains(newMockedUser)); 
         verify(sessionRepository).save(mockedSession);
     }
 
     @Test
+    @Tag("Unparticipate")
+    @DisplayName("Test noLongerParticipateSession with null session should throw NotFoundException")
     void noLongerParticipateSessionNull() {
+        // Arrange: Set up mock responses for a null session
         when(sessionRepository.findById(session.getId())).thenReturn(Optional.empty());
 
+        // Act & Assert: Verify that a NotFoundException is thrown
         assertThrows(NotFoundException.class, () -> {
             sessionService.noLongerParticipate(session.getId(), 6L);
         });
     }
 
     @Test
+    @Tag("Read")
+    @DisplayName("Test getById should return the session")
     void testGetById() {
+        // Arrange: Set up mock responses
         when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
         
+        // Act: Call the getById method
         Session res = sessionService.getById(session.getId());
 
+        // Assert: Verify that the session was returned correctly
         verify(sessionRepository).findById(session.getId());
-
         assertEquals(session, res);
     }
 
     @Test
+    @Tag("Update")
+    @DisplayName("Test update should save and return the updated session")
     void testUpdate() {
+        // Arrange: Set up mock responses
         when(sessionRepository.save(session)).thenReturn(session);
 
+        // Act: Call the update method
         Session res = sessionService.update(session.getId(), session);
 
+        // Assert: Verify that the session was updated and returned correctly
         verify(sessionRepository).save(session);
-
         assertEquals(session, res);
     }
 }

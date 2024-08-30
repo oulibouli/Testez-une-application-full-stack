@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,21 +32,30 @@ public class AuthTokenFilterTest {
 
     @InjectMocks
     private AuthTokenFilter authTokenFilter;
+
     @Mock
     private JwtUtils jwtUtils;
+
     @Mock
     private HttpServletRequest request;
+
     @Mock
     private HttpServletResponse response;
+
     @Mock
     private FilterChain filterChain;
+
     @Mock
     private UserDetails userDetails;
+
     @Mock
     private UserDetailsServiceImpl userDetailsService;
 
     @Test
+    @Tag("Security")
+    @DisplayName("Test JWT filter with valid token should authenticate the user")
     void testDoFilterInternal()  throws ServletException, IOException {
+        // Arrange: Set up mock responses
         String mockUsername = "username";
         String mockJwt = "token";
         
@@ -57,10 +68,10 @@ public class AuthTokenFilterTest {
         // Mock loading the user details by username
         when(userDetailsService.loadUserByUsername(mockUsername)).thenReturn(userDetails);
 
-        // Execute the filter
+        // Act: Execute the filter
         authTokenFilter.doFilterInternal(request, response, filterChain);
 
-        // Verify the interactions
+        // Assert: Verify the interactions
         verify(jwtUtils).validateJwtToken(mockJwt);
         verify(jwtUtils).getUserNameFromJwtToken(mockJwt);
         verify(userDetailsService).loadUserByUsername(mockUsername);
@@ -71,40 +82,55 @@ public class AuthTokenFilterTest {
             (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         assertNotNull(authentication);
-        System.out.println(authentication);
         assertEquals(userDetails, authentication.getPrincipal());
     }
+
     @Test
+    @Tag("Security")
+    @DisplayName("Test JWT filter with invalid token should not authenticate the user")
     void testDoFilterInternalNotOk() throws ServletException, IOException {
+        // Arrange: Set up mock responses
         String mockJwt = "invalidJwt";
         String headerAuth = "Bearer " + mockJwt;
         String mockUsername = "username";
 
         // Mock the header with the invalid JWT
         when(request.getHeader("Authorization")).thenReturn(headerAuth);
-        // Simulate an exception during JWT validation (using a RuntimeException)
+        // Simulate an exception during JWT validation
         when(jwtUtils.validateJwtToken(mockJwt)).thenThrow(new RuntimeException("Cannot set user authentication"));
 
-        // Execute the filter
+        // Act: Execute the filter
         authTokenFilter.doFilterInternal(request, response, filterChain);
 
-        // Verify that the filter chain was NOT called since an exception occurred
+        // Assert: Verify that the filter chain was NOT called since an exception occurred
         verify(userDetailsService, never()).loadUserByUsername(mockUsername);
     }
+
     @Test
+    @Tag("Security")
+    @DisplayName("Test JWT filter with no Authorization header should pass the request to the next filter")
     void testDoFilterInternal_NoAuthorizationHeader() throws ServletException, IOException {
+        // Arrange: No Authorization header
         when(request.getHeader("Authorization")).thenReturn(null);
 
+        // Act: Execute the filter
         authTokenFilter.doFilterInternal(request, response, filterChain);
+
+        // Assert: Verify that the filter chain was called
         verify(filterChain).doFilter(request, response);
     }
+
     @Test
+    @Tag("Security")
+    @DisplayName("Test JWT filter with invalid Authorization header format should pass the request to the next filter")
     void testDoFilterInternal_InvalidAuthorizationHeader() throws ServletException, IOException {
+        // Arrange: Invalid Authorization header
         when(request.getHeader("Authorization")).thenReturn("Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
 
+        // Act: Execute the filter
         authTokenFilter.doFilterInternal(request, response, filterChain);
 
+        // Assert: Verify that the filter chain was called
         verify(filterChain).doFilter(request, response);
-
     }
 }
