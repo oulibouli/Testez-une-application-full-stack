@@ -1,3 +1,4 @@
+import './auth.cy'
 import './login.cy'
 import './me.cy'
 import './not-found.cy' 
