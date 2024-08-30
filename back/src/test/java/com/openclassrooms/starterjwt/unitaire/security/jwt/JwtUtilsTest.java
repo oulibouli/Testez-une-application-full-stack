@@ -97,7 +97,6 @@ public class JwtUtilsTest {
         boolean isValid = jwtUtils.validateJwtToken(notValidToken);
     
         assertFalse(isValid);
-        // Vous pouvez ajouter une vérification des logs ici si nécessaire
     }
     @Test
     void testValidateJwtTokenErrorMalformed() {
@@ -106,7 +105,6 @@ public class JwtUtilsTest {
         boolean isValid = jwtUtils.validateJwtToken(notValid);
     
         assertFalse(isValid);
-        // Vous pouvez ajouter une vérification des logs ici si nécessaire
     }
     @Test
     void testValidateJwtTokenErrorExpired() {

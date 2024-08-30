@@ -49,8 +49,28 @@ public class UserDetailsImplTest {
         assertTrue(user.equals(user));
     }
     @Test
-    void testIsNotEqual() {
+    void testIsNotEqualNull() {
         UserDetailsImpl user = new UserDetailsImpl(1L, "username", "firstName", "lastName", false, "password");
         assertFalse(user.equals(null));
+    }
+    @Test
+    void testIsNotEqualDifferentClass() {
+        UserDetailsImpl user = new UserDetailsImpl(1L, "username", "firstName", "lastName", false, "password");
+        Object differentClassObject = new Object();
+        assertFalse(user.equals(differentClassObject));
+    }
+
+    @Test
+    void testIsNotEqualDifferentId() {
+        UserDetailsImpl user1 = new UserDetailsImpl(1L, "username1", "firstName1", "lastName1", false, "password1");
+        UserDetailsImpl user2 = new UserDetailsImpl(2L, "username2", "firstName2", "lastName2", false, "password2");
+        assertFalse(user1.equals(user2));
+    }
+
+    @Test
+    void testIsEqualSameId() {
+        UserDetailsImpl user1 = new UserDetailsImpl(1L, "username1", "firstName1", "lastName1", false, "password1");
+        UserDetailsImpl user2 = new UserDetailsImpl(1L, "username2", "firstName2", "lastName2", false, "password2");
+        assertTrue(user1.equals(user2));
     }
 }

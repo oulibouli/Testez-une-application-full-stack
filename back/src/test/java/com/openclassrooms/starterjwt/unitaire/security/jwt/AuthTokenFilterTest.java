@@ -91,4 +91,20 @@ public class AuthTokenFilterTest {
         // Verify that the filter chain was NOT called since an exception occurred
         verify(userDetailsService, never()).loadUserByUsername(mockUsername);
     }
+    @Test
+    void testDoFilterInternal_NoAuthorizationHeader() throws ServletException, IOException {
+        when(request.getHeader("Authorization")).thenReturn(null);
+
+        authTokenFilter.doFilterInternal(request, response, filterChain);
+        verify(filterChain).doFilter(request, response);
+    }
+    @Test
+    void testDoFilterInternal_InvalidAuthorizationHeader() throws ServletException, IOException {
+        when(request.getHeader("Authorization")).thenReturn("Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
+
+        authTokenFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+
+    }
 }
