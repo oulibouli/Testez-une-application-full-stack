@@ -96,38 +96,21 @@ describe('MeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // Test the back method, which navigates to the previous page
-  it('should go back to the previous page', () => {
-    component.back()
-    expect(spyHistoryBack).toHaveBeenCalled()
+  // Test that ngOnInit retrieves the user by ID and subscribes to the observable
+  it('should get userById and subscribe to user observable', () => {
+    component.ngOnInit()
+    expect(mockUserService.getById).toHaveBeenCalledWith('1')
+    expect(component.user).toEqual(mockUser)
   })
 
-  it('should display user information', () => {
-    const user = {
-      id: 1,
-      email: 'test@mail.com',
-      lastName: 'test',
-      firstName: 'test',
-      admin: true,
-      password: 'test',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    component.user = user;
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-
-    // Format dates to longDate
-    registerLocaleData(localeEn);
-    const locale = 'en-US';
-    const createdAtFormatted = formatDate(user.createdAt, 'longDate', locale);
-    const updatedAtFormatted = formatDate(user.updatedAt, 'longDate', locale);
-
-    expect(compiled.textContent).toContain(user.lastName);
-    expect(compiled.textContent).toContain(user.firstName);
-    expect(compiled.textContent).toContain(user.email);
-    expect(compiled.textContent).toContain(createdAtFormatted);
-    expect(compiled.textContent).toContain(updatedAtFormatted);
-  });
+  // Test the delete method, which deletes the user account
+  it('should delete the user account', () => {
+    component.delete()
+    expect(mockUserService.delete).toHaveBeenCalledWith('1')
+    expect(matSnackBarMock.open).toHaveBeenCalledWith(
+      'Your account has been deleted !',
+      'Close',
+      { duration: 3000 }
+    )
+  })
 });

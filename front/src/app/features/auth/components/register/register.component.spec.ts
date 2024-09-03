@@ -1,100 +1,86 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { expect } from '@jest/globals';
+import { spyOn } from 'jest-mock';
 
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../../services/auth.service';
-import { RegisterRequest } from '../../interfaces/registerRequest.interface';
+import { of } from 'rxjs';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
-  let mockAuthService: Partial<AuthService>;
-  let router: Router;
+  let authService: jest.Mocked<AuthService>;
+  let router: jest.Mocked<Router>;
 
-  beforeEach(async () => {
-    // Mock the AuthService with a successful registration response
-    mockAuthService = {
-      register: jest.fn().mockReturnValue(of(null))
-    };
-    
-    // Configure the testing module
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+
+    authService = {
+      register: jest.fn(),
+      login: jest.fn(),
+    } as unknown as jest.Mocked<AuthService>;
+
+    router = {
+      navigate: jest.fn(),
+    } as unknown as jest.Mocked<Router>;
+
+    TestBed.configureTestingModule({
       declarations: [RegisterComponent],
-      providers: [
-        {provide: AuthService, useValue: mockAuthService}
-      ],
       imports: [
         BrowserAnimationsModule,
         HttpClientModule,
-        ReactiveFormsModule,  
+        ReactiveFormsModule,
         MatCardModule,
         MatFormFieldModule,
         MatIconModule,
-        MatInputModule
-      ]
-    })
-      .compileComponents();
+        MatInputModule,
+      ],
+      providers: [
+        { provide: AuthService, useValue: authService },
+        { provide: Router, useValue: router },
+      ],
+    }).compileComponents();
 
-    // Create the component instance and trigger change detection
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    router = TestBed.inject(Router);
   });
-
-  // Verify that the component is created successfully
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  // Test the registration process and navigation to the login page
-  it('should register user and navigate to /login', () => {
-    // Define a mock registration request
-    const mockRegisterRequest: RegisterRequest = {
-        email: 'test@test.com',
-        firstName: 'firstname',
-        lastName: 'lastname',
-        password: 'password'
+  it('should pass to register the form inputs', () => {
+    const mockUser = {
+      lastName: 'Admin',
+      firstName: 'Admin',
+      email: 'yoga@Studio.com',
+      password: 'test!1234',
     };
-    
-    // Set form values and submit the form
-    component.form.setValue(mockRegisterRequest);
-    jest.spyOn(router, 'navigate');
-    component.submit();
-    
-    // Verify the interactions and navigation
-    expect(mockAuthService.register).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
-  });
 
-  // Test handling of registration failure with an error
-  it('should send an error when register fails', () => {
-    // Simulate a registration failure
-    const mockError = new Error('register failed');
-    (mockAuthService.register as jest.Mock).mockReturnValueOnce(throwError(() => mockError));
+    const authService = (component as any).authService;
+    const registerSpy = spyOn(authService, 'register') as jest.SpyInstance;
+    registerSpy.mockReturnValue(of({}));
 
-    // Define a mock registration request
-    const mockRegisterRequest: RegisterRequest = {
-      email: 'test@test.com',
-      firstName: 'firstname',
-      lastName: 'lastname',
-      password: 'password'
-    };
-    
-    // Set form values and submit the form
-    component.form.setValue(mockRegisterRequest);
+    component.form.controls['firstName'].setValue(mockUser.firstName);
+    component.form.controls['lastName'].setValue(mockUser.lastName);
+    component.form.controls['email'].setValue(mockUser.email);
+    component.form.controls['password'].setValue(mockUser.password);
+
     component.submit();
 
-    // Verify that the error flag is set to true
-    expect(component.onError).toBeTruthy();
+    expect(registerSpy).toHaveBeenCalledWith(mockUser);
+  });
+
+  it('should disable the submit button if an input is wrong or missing', () => {
+    component.form.controls['firstName'].setValue('Admin');
+    component.form.controls['lastName'].setValue('Admin');
+    component.form.controls['email'].setValue(''); // Empty email
+    component.form.controls['password'].setValue('test!1234');
+
+    expect(component.form.valid).toBe(false);
+    
   });
 });

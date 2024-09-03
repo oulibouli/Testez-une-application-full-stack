@@ -73,21 +73,53 @@ describe('LoginComponent', () => {
     router = TestBed.inject(Router);
   });
 
-  // Verify that the component is created successfully
-  it('should create', () => {
-    expect(component).toBeTruthy();
+
+  // Test the login and navigation to the sessions page
+  it('should login and navigate to sessions', () => {
+    jest.spyOn(router, 'navigate');
+    
+    // Define a mock login request and session information
+    const mockLoginRequest: LoginRequest = {
+        email: "test@test.com",
+        password: "password"
+    };
+    const mockSessionInformation: SessionInformation = {
+      token: '1234',
+      type: 'Bearer',
+      id: 1,
+      username: 'username',
+      firstName: 'firstName',
+      lastName: 'lastName',
+      admin: false
+    };
+    
+    // Set form values and submit the form
+    component.form.setValue(mockLoginRequest);
+    component.submit();
+
+    // Verify the interactions and navigation
+    expect(mockAuthService.login).toHaveBeenCalledWith(mockLoginRequest);
+    expect(mockSessionService.logIn).toHaveBeenCalledWith(mockSessionInformation);
+    expect(router.navigate).toHaveBeenCalledWith(['/sessions']);
   });
 
-  it('should display an error if one of the fields is empty', () => {
-    const email = component.form.get('email');
-    const password = component.form.get('password');
+  // Test handling of login failure with an error
+  it('should set error to true when login fails', () => {
+    // Simulate a login failure
+    const loginErrorMock = new Error('Invalid credentials');
+    (mockAuthService.login as jest.Mock).mockReturnValueOnce(throwError(() => loginErrorMock));
 
-    if (email && password) {
-      email.setValue('example@MatLine.com');
-      password.setValue('');
-      
-      expect(component.form.valid).toBe(false);
-    }
+    // Define a mock login request
+    const mockLoginRequest: LoginRequest = {
+      email: "test@test.com",
+      password: "password"
+    };
+
+    // Set form values and submit the form
+    component.form.setValue(mockLoginRequest);
+    component.submit();
+
+    // Verify that the error flag is set to true
+    expect(component.onError).toBeTruthy();
   });
-
 });
