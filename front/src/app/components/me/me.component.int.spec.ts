@@ -12,8 +12,6 @@ import { MeComponent } from './me.component';
 import { UserService } from 'src/app/services/user.service';
 import { Router } from '@angular/router';
 import { User } from 'src/app/interfaces/user.interface';
-import { formatDate, registerLocaleData } from '@angular/common';
-import localeEn from '@angular/common/locales/en';
 
 describe('MeComponent', () => {
   let component: MeComponent;

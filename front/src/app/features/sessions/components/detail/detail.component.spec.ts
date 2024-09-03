@@ -196,18 +196,18 @@ describe('DetailComponent', () => {
 
   it('should display sessions dom elements correctly', () => {
     const sessionName = fixture.debugElement.query(By.css('h1'))
-    expect(sessionName.nativeElement.textContent).toContain('Test Session')
     const spans = fixture.debugElement.query(By.css('.my2')).nativeElement.querySelectorAll('span')
     const sessionUsers = spans[0];
     const sessionDate = spans[1];
+    const sessionDescription = fixture.debugElement.query(By.css('.description'))
+    const sessionCreated = fixture.debugElement.query(By.css('.created'))
+    const sessionUpdated = fixture.debugElement.query(By.css('.updated'))
+    
+    expect(sessionName.nativeElement.textContent).toContain('Test Session')
     expect(sessionUsers.textContent).toContain('1 attendees')
     expect(sessionDate.textContent).toContain('August 22, 2024')
-    const sessionDescription = fixture.debugElement.query(By.css('.description'))
     expect(sessionDescription.nativeElement.textContent).toContain('desc')
-    const sessionCreated = fixture.debugElement.query(By.css('.created'))
     expect(sessionCreated.nativeElement.textContent).toContain('Create at:  August 21, 2024')
-    const sessionUpdated = fixture.debugElement.query(By.css('.updated'))
     expect(sessionUpdated.nativeElement.textContent).toContain('Last update:  August 23, 2024')
-
   })
 });
